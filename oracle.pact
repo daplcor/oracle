@@ -48,7 +48,6 @@
     is-active:bool)
 
 (defschema recent-reports
-  symbol:string
   reports:[string])
 
 ;; Tables
@@ -76,8 +75,7 @@
       , 'value: 0.0 })
 
     (insert recent-reports-table symbol
-      { 'symbol: symbol
-      , 'reports: [] })))
+      { 'reports: [] })))
 
 (defun submit-report:string (symbol:string reporter:string value:decimal)
   @doc "Submit a price report for a symbol"
@@ -114,12 +112,11 @@
     { 'aggregation-count := agg-count }
 
     (with-read recent-reports-table symbol
-      { 'reports := current-reports, 'symbol := s }
+      { 'reports := current-reports }
 
         ;; Using util-lists fifo-push to maintain a fixed-size list
         (write recent-reports-table symbol
-          { 'symbol: s
-          , 'reports: (fifo-push current-reports agg-count report) }))))
+          { 'reports: (fifo-push current-reports agg-count report) }))))
 
 ;; I could break out median-value into a separate function, but it is only used here
 (defun update-oracle-value:string (symbol:string)
@@ -140,9 +137,7 @@
           ;; Update the truthful oracle value
           (write oracle symbol
             { 'timestamp: (now)
-            , 'value: median-value })
-
-         ))
+            , 'value: median-value })))
 
 (defun update-symbol-status:string (symbol:string is-active:bool)
   @doc "Update the active status of a symbol"
