@@ -131,7 +131,7 @@ Client → get-price → retrieve current price and timestamp
 
 ## Key Functions
 
-### Governance Functions
+### Privileged Functions
 
 #### `add-reporter`
 
@@ -275,8 +275,8 @@ For less critical pairs:
 
 ## Security Considerations
 
-1. **Reporter Authentication**: All reporters are authenticated using their guardset
-2. **Time Constraints**: Reporters can only submit at their assigned time windows
+1. **Reporter Authentication**: All reporters are authenticated using their keyset
+2. **Time Constraints**: Reporters can only submit after their assigned time windows
 3. **Governance Control**: Symbol and reporter management requires OPS capability
 4. **Internal Capabilities**: Report updating is protected by internal capabilities
 
