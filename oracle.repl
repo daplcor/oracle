@@ -1,0 +1,19 @@
+;; Load the environment
+
+(env-data {"disable-marmalade":true,
+           "disable-util-lib":false,
+           "disable-test-accounts":false})
+
+(load "kda-env/init.repl")
+(load "helpers/init.repl")
+; Load my module
+(begin-tx)
+(namespace 'ORACLE_NS)
+(load "oracle.pact")
+(typecheck "ORACLE_NS.oracle")
+(commit-tx)
+
+(env-gasmodel "table")(env-gaslimit 150000)
+(load "testing/main.repl")
+
+(enforce (< (env-gas) 10000) "Gas should be less than 10,000")

@@ -1,0 +1,9 @@
+(begin-tx "Read only testing")
+(namespace 'ORACLE_NS)
+(use oracle)
+(env-data {
+    'kda: "KDA/USD"
+})
+(print (get-recent-reports (read-msg 'kda)))
+(print (get-price (read-msg 'kda)))
+(commit-tx)

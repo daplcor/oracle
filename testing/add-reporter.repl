@@ -1,0 +1,14 @@
+(begin-tx "Add new reporter")
+(namespace 'ORACLE_NS)
+(use oracle)
+(env-keys ["ops"])
+(env-data {
+    'bob-key: {'keys: ["bob-key"]},
+    'alice-key: {'keys: ["alice-key"]},
+    'dave-key: {'keys: ["dave-key"]}
+})
+(add-reporter "bob" "bobs" (read-keyset 'bob-key))
+(add-reporter "alice" "alices" (read-keyset 'alice-key))
+(add-reporter "dave" "daves" (read-keyset 'dave-key))
+
+(commit-tx)

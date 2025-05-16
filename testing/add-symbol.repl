@@ -1,0 +1,11 @@
+(begin-tx "Add new reporter")
+(namespace 'ORACLE_NS)
+(use oracle)
+(env-keys ["ops"])
+(env-data {
+    'kda: "KDA/USD"
+})
+(add-symbol (read-msg 'kda) 3600.0 900.0 5)
+(expect "no reports yet" [] (get-recent-reports (read-msg 'kda)))
+
+(commit-tx)

@@ -1,0 +1,17 @@
+(begin-tx)
+(define-namespace "ORACLE_NS" basic-guards.GUARD_SUCCESS basic-guards.GUARD_SUCCESS)
+(namespace "ORACLE_NS")
+
+
+(env-data {'ks-gov:["gov"], 'ks-ops:["ops"]})
+(define-keyset "ORACLE_NS.GOV" (read-keyset 'ks-gov))
+(define-keyset "ORACLE_NS.OPS" (read-keyset 'ks-ops))
+
+(env-keys ["gov"])
+
+(commit-tx)
+
+
+(env-data {})
+(env-keys [])
+(env-sigs [])
