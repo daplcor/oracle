@@ -8,8 +8,8 @@
     'dave-key: {'keys: ["dave-key"]},
     'kda: "KDA/USD"
 })
-(add-reporter "bob" "bobs" (read-keyset 'bob-key))
-(add-reporter "alice" "alices" (read-keyset 'alice-key))
-(add-reporter "dave" "daves" (read-keyset 'dave-key))
+(add-reporter "bob" (read-msg 'kda) "bobs" (read-keyset 'bob-key))
+(add-reporter "alice" (read-msg 'kda) "alices" (read-keyset 'alice-key))
+(add-reporter "dave" (read-msg 'kda) "daves" (read-keyset 'dave-key))
 
 (commit-tx)

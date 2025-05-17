@@ -2,23 +2,27 @@
 
 ;; Load all tests
 
-;; Add reporters
-(load "add-reporter.repl")
-(print "Add Reporter Testing Successful")
-(env-sigs [])
-(env-data {})
-
 ;; add-symbol
 (load "add-symbol.repl")
 (print "Add Symbol Testing Successful")
 (env-sigs [])
 (env-data {})
 
+;; Add reporters
+(load "add-reporter.repl")
+(print "Add Reporter Testing Successful")
+(env-sigs [])
+(env-data {})
+
+
+
 ;; submit report
 (load "submit-report.repl")
 (print "Report Submission Testing Successful")
 (env-sigs [])
 (env-data {})
+
+(load "modify-reporter.repl")
 
 ;; read functions
 (load "read.repl")

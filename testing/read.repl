@@ -10,4 +10,5 @@
 ;  (print (get-price (read-msg 'kda)))
 ;  (print (check-reporter-time "bob"))
 ;  (print (check-reporter-time "alice"))
+(print (get-symbol-reporters (read-msg 'kda)))
 (commit-tx)
