@@ -36,6 +36,7 @@
     value:decimal)
 
 (defschema reporter
+    @doc "reporter-key is a unique key for the reporter and symbol"
     description:string
     guard:guard
     next-report-time:time
@@ -154,14 +155,14 @@
            (values:[decimal] (map (at 'value ) recent-reports)))
 
             ;; Computes the real time price
-            { 'timestamp: (get-update-timestamp symbol)
+            { 'timestamp: (at 'timestamp (at 0 recent-reports))
             , 'value: (med* values) }))
 
-(defun check-reporter-time:string (reporter:string)
+(defun check-reporter-time:time (reporter:string)
   @doc "Check if reporter can submit now"
   (with-read reporters reporter
     { 'next-report-time := next-time }
-      (format "Next report time for {} is {}" [reporter next-time])))
+      next-time))
 
 (defun calculate-next-report-time:time (symbol:string)
   @doc "Calculate the next report time with randomization"
@@ -170,14 +171,9 @@
     , 'max-deviation := max-deviation }
     (add-time (now) (+ avg-interval (random-decimal-range (- max-deviation) max-deviation)))))
 
-(defun get-update-timestamp:time (symbol:string)
-  @doc "Get the last update timestamp for a symbol"
-  (let ((recent-reports (get-recent-reports symbol))
-    (first-timestamp:time (at 'timestamp (at 0 recent-reports)))
-           (rest-timestamps:[time] (map (at 'timestamp)
-                                       (drop 1 recent-reports))))
-           ;; Returns the oldest timestamp
-           (fold earliest first-timestamp rest-timestamps)))
+(defun reporter-key:string (reporter:string symbol:string)
+  @doc "Generate a unique key for the reporter and symbol"
+  (format "{}:{}" [reporter symbol]))
 
 ;; Validation Functions
 

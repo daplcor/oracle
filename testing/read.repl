@@ -1,3 +1,5 @@
+;; This is a read-only tests and I like to keep them disabled unless needed for debugging
+
 (begin-tx "Read only testing")
 (namespace 'ORACLE_NS)
 (use oracle)
@@ -5,5 +7,7 @@
     'kda: "KDA/USD"
 })
 (print (get-recent-reports (read-msg 'kda)))
-(print (get-price (read-msg 'kda)))
+;  (print (get-price (read-msg 'kda)))
+;  (print (check-reporter-time "bob"))
+;  (print (check-reporter-time "alice"))
 (commit-tx)

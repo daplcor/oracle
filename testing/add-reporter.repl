@@ -5,7 +5,8 @@
 (env-data {
     'bob-key: {'keys: ["bob-key"]},
     'alice-key: {'keys: ["alice-key"]},
-    'dave-key: {'keys: ["dave-key"]}
+    'dave-key: {'keys: ["dave-key"]},
+    'kda: "KDA/USD"
 })
 (add-reporter "bob" "bobs" (read-keyset 'bob-key))
 (add-reporter "alice" "alices" (read-keyset 'alice-key))
