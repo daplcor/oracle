@@ -52,7 +52,6 @@
 
 ;; Tables
 
-(deftable oracle:{oracle-result})
 (deftable reports:{report-schema})
 (deftable reporters:{reporter})
 (deftable symbols:{symbol-config})
@@ -69,10 +68,6 @@
       , 'max-deviation: max-deviation
       , 'aggregation-count: aggregation-count
       , 'is-active: true })
-
-    (insert oracle symbol
-      { 'timestamp: (now)
-      , 'value: 0.0 })
 
     (insert recent-reports-table symbol
       { 'reports: [] })))
@@ -102,8 +97,7 @@
         (with-capability (UPDATE_REPORTS)
         (update-recent-reports symbol (format "{}-{}-{}" [symbol reporter (now)]))
 
-        ;; Update oracle value with latest reports
-        (update-oracle-value symbol))))
+    )))
 
 (defun update-recent-reports:string (symbol:string report:string)
   @doc "Add a report ID to the recent reports list for a symbol"
@@ -117,27 +111,6 @@
         ;; Using util-lists fifo-push to maintain a fixed-size list
         (write recent-reports-table symbol
           { 'reports: (fifo-push current-reports agg-count report) }))))
-
-;; I could break out median-value into a separate function, but it is only used here
-(defun update-oracle-value:string (symbol:string)
-  @doc "Update the oracle value using median of recent reports"
-    (require-capability (UPDATE_REPORTS))
-    (enforce-recent-reports symbol)
-
-        (let
-          ((recent-reports (get-recent-reports symbol))
-           ;; We have to extract values as decimals for med functions
-           (values:[decimal] (map (lambda (r) (at 'value r)) recent-reports))
-
-           ;; Calculates the median price
-           (median-value:decimal (if (is-even (length values))
-                                   (med* values)
-                                   (med values))))
-
-          ;; Update the truthful oracle value
-          (write oracle symbol
-            { 'timestamp: (now)
-            , 'value: median-value })))
 
 (defun update-symbol-status:string (symbol:string is-active:bool)
   @doc "Update the active status of a symbol"
@@ -164,18 +137,25 @@
         (update reporters reporter
         { 'is-active: is-active })))
 
-
 (defun get-recent-reports:[object{report-schema}] (symbol:string)
   @doc "Get recent reports for a symbol using the index"
   (with-read recent-reports-table symbol
-    { 'reports := report-ids }
-    (map (lambda (id) (read reports id)) report-ids)))
+    { 'reports := r-id }
+        (map (read reports) r-id)))
 
 ;; Helper Functions
 
 (defun get-price:object{oracle-result} (symbol:string)
     @doc "Get the current price for a symbol"
-    (read oracle symbol))
+    (enforce-recent-reports symbol)
+
+        (let ((recent-reports (get-recent-reports symbol))
+           ;; We have to extract values as decimals for med functions
+           (values:[decimal] (map (at 'value ) recent-reports)))
+
+            ;; Computes the real time price
+            { 'timestamp: (get-update-timestamp symbol)
+            , 'value: (med* values) }))
 
 (defun check-reporter-time:string (reporter:string)
   @doc "Check if reporter can submit now"
@@ -189,6 +169,15 @@
     { 'avg-interval := avg-interval
     , 'max-deviation := max-deviation }
     (add-time (now) (+ avg-interval (random-decimal-range (- max-deviation) max-deviation)))))
+
+(defun get-update-timestamp:time (symbol:string)
+  @doc "Get the last update timestamp for a symbol"
+  (let ((recent-reports (get-recent-reports symbol))
+    (first-timestamp:time (at 'timestamp (at 0 recent-reports)))
+           (rest-timestamps:[time] (map (at 'timestamp)
+                                       (drop 1 recent-reports))))
+           ;; Returns the oldest timestamp
+           (fold earliest first-timestamp rest-timestamps)))
 
 ;; Validation Functions
 
@@ -217,7 +206,6 @@
     (enforce (> (length recent-reports) 0) "No recent reports available")))
 )
 
-(create-table oracle)
 (create-table reports)
 (create-table reporters)
 (create-table symbols)

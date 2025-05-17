@@ -11,9 +11,10 @@
 
 
 (env-chain-data { 'block-time: (time "1970-01-01T00:00:01Z")})
-(submit-report (read-msg 'kda) "bob" 0.62)
+(expect "Bob submits his price" "Write succeeded" (submit-report (read-msg 'kda) "bob" 0.62))
 (expect "price is correct" 0.62 (at 'value (get-price (read-msg 'kda))))
-
+(print (get-recent-reports (read-msg 'kda)))
+(print ".62")
 (expect-failure "Bob needs to wait to submit" "Too early to report" (enforce-check-reporter-time "bob"))
 
 (env-keys [])
