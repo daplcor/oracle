@@ -16,11 +16,11 @@
 (defcap OPS ()
     (enforce-keyset "ORACLE_NS.OPS"))
 
- (defcap REPORTER (reporter:string symbol:string)
+(defcap REPORTER (reporter:string symbol:string)
     @doc "Capability for an approved reporter to submit data"
     (with-read reporters (reporter-key reporter symbol)
-      { 'guard := g }
-      (enforce-guard g)))
+        { 'guard := g }
+        (enforce-guard g)))
 
 (defcap UPDATE_REPORTS ()
     @doc "Internal capability to update reports" true)
@@ -46,6 +46,7 @@
     is-active:bool)
 
 (defschema symbol-config
+    @doc "symbol name is a unique key"
     avg-interval:decimal        ;; T-bar: Average reporting interval
     max-deviation:decimal       ;; delta-t: Maximum deviation in timing
     aggregation-count:integer   ;; N: Number of reports for aggregation
@@ -125,9 +126,10 @@
 
 (defun update-symbol:string (symbol:string avg-interval:decimal max-deviation:decimal aggregation-count:integer)
   @doc "Update the symbol configuration"
+  (enforce-symbol-numbers avg-interval max-deviation aggregation-count)
+
   (with-read symbols symbol
     { 'aggregation-count := old-agg-count }
-  (enforce-symbol-numbers avg-interval max-deviation aggregation-count)
 
   (with-capability (OPS)
     (update symbols symbol

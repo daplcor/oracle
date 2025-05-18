@@ -21,6 +21,6 @@
 
 (expect "Update successful" "Write succeeded" (update-symbol (read-msg 'kda) 900.0 100.0 4))
 
-(print (get-recent-reports (read-msg 'kda)))
+(expect "Four entries" 4 (length (get-recent-reports (read-msg 'kda))))
 
 (rollback-tx)

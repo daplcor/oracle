@@ -14,17 +14,19 @@
 (env-sigs [])
 (env-data {})
 
-
-
 ;; submit report
 (load "submit-report.repl")
 (print "Report Submission Testing Successful")
 (env-sigs [])
 (env-data {})
 
+;; Modifiers
 (load "modify-functions.repl")
+(print "Modifier Testing Successful")
+(env-sigs [])
+(env-data {})
 
 ;; read functions
 (load "read.repl")
-
+(print "Read Testing Successful")
 
