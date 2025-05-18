@@ -37,7 +37,7 @@
     timestamp:time
     value:decimal)
 
-(defschema reporter
+(defschema reporter-schema
     @doc "reporter-key is a unique key for the reporter and symbol"
     description:string
     guard:guard
@@ -57,7 +57,7 @@
 ;; Tables
 
 (deftable reports:{report-schema})
-(deftable reporters:{reporter})
+(deftable reporters:{reporter-schema})
 (deftable symbols:{symbol-config})
 (deftable recent-reports:{recent-reports-schema})
 
@@ -183,7 +183,7 @@
             { 'timestamp: (at 'timestamp (at 0 recent-reports))
             , 'value: (med* values) }))
 
-(defun reporter-info:object{reporter} (reporter:string symbol:string)
+(defun reporter-info:object{reporter-schema} (reporter:string symbol:string)
   @doc "Returns the reporter information"
   (read reporters (reporter-key reporter symbol)))
 
@@ -208,10 +208,10 @@
     , 'max-deviation := max-deviation }
     (add-time (now) (+ avg-interval (random-decimal-range (- max-deviation) max-deviation)))))
 
-(defun get-reporters-by-symbols:[object] (symbol:string)
+(defun get-reporters-by-symbols:[object{reporter-schema}] (symbol:string)
     @doc "Get all reporters for a given symbol, local call only due to gas"
    (fold-db reporters (lambda (k obj) (and (ends-with k symbol) (at 'is-active obj) ))
-                      (lambda (k obj) (+ obj {'last-report: (read reports (at 'last-report-id obj))}))))
+                      (lambda (k obj) (+ obj {'last-report-id: (read reports (at 'last-report-id obj))}))))
 
 
 (defun reporter-key:string (reporter:string symbol:string)
