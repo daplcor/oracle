@@ -11,7 +11,7 @@
 
 
 (env-chain-data { 'block-time: (time "1970-01-01T00:00:01Z")})
-(expect "Bob submits his price" "Report submitted successfully" (submit-report (read-msg 'kda) "bob" 0.62))
+(expect "Bob submits his price" "Write succeeded" (submit-report (read-msg 'kda) "bob" 0.62))
 (expect "price is correct" 0.62 (at 'value (get-price (read-msg 'kda))))
 
 (expect-failure "Bob needs to wait to submit" "Too early to report" (enforce-check-reporter-time "bob" (read-msg 'kda)))
@@ -33,7 +33,7 @@
     'kda: "KDA/USD"
 })
 (env-chain-data { 'block-time: (time "1970-01-01T02:00:01Z")})
-(expect "Alice submits her price" "Report submitted successfully" (submit-report (read-msg 'kda) "alice" 0.63))
+(expect "Alice submits her price" "Write succeeded" (submit-report (read-msg 'kda) "alice" 0.63))
 
 (commit-tx)
 
@@ -45,19 +45,19 @@
     'kda: "KDA/USD"
 })
 (env-chain-data { 'block-time: (time "1970-01-01T03:00:01Z")})
-(expect "Dave submits his price" "Report submitted successfully" (submit-report (read-msg 'kda) "dave" 0.64))
+(expect "Dave submits his price" "Write succeeded" (submit-report (read-msg 'kda) "dave" 0.64))
 (expect "price is correct" 0.63 (at 'value (get-price (read-msg 'kda))))
 
 (env-chain-data { 'block-time: (time "1970-01-01T04:00:01Z")})
-(expect "Dave submits his 2nd price" "Report submitted successfully" (submit-report (read-msg 'kda) "dave" 0.64))
+(expect "Dave submits his 2nd price" "Write succeeded" (submit-report (read-msg 'kda) "dave" 0.64))
 (expect "price is correct" 0.635 (at 'value (get-price (read-msg 'kda))))
 
 (env-chain-data { 'block-time: (time "1970-01-01T05:30:01Z")})
-(expect "Dave submits his 3rd price" "Report submitted successfully" (submit-report (read-msg 'kda) "dave" 0.65))
+(expect "Dave submits his 3rd price" "Write succeeded" (submit-report (read-msg 'kda) "dave" 0.65))
 (expect "price is correct" 0.64 (at 'value (get-price (read-msg 'kda))))
 
 (env-chain-data { 'block-time: (time "1970-01-01T06:32:01Z")})
-(expect "Dave submits his 4th price" "Report submitted successfully" (submit-report (read-msg 'kda) "dave" 0.70))
+(expect "Dave submits his 4th price" "Write succeeded" (submit-report (read-msg 'kda) "dave" 0.70))
 (expect "price is correct as the first entry drops off" 0.64 (at 'value (get-price (read-msg 'kda))))
 (commit-tx)
 

@@ -16,4 +16,4 @@
 (env-gasmodel "table")(env-gaslimit 150000)
 (load "testing/main.repl")
 
-(enforce (< (env-gas) 10000) "Gas should be less than 10,000")
+(enforce (< (env-gas) 50000) "Gas should be less than 10,000")

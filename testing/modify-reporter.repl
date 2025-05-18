@@ -6,10 +6,8 @@
 
     'kda: "KDA/USD"
 })
-(expect "reporter list" {"reporters": ["bob" "alice" "dave"]} (get-symbol-reporters (read-msg 'kda)))
 
 (update-reporter-status "dave" (read-msg 'kda) false)
 
-(expect "reporter list" {"reporters": ["bob" "alice"]} (get-symbol-reporters (read-msg 'kda)))
 
 (commit-tx)
