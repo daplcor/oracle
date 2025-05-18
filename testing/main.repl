@@ -22,7 +22,7 @@
 (env-sigs [])
 (env-data {})
 
-(load "modify-reporter.repl")
+(load "modify-functions.repl")
 
 ;; read functions
 (load "read.repl")

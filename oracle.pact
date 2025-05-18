@@ -6,6 +6,7 @@
 (use free.util-random)
 (use free.util-lists)
 (use free.util-strings)
+(use free.util-fungible)
 
 ;; Capabilities
 
@@ -50,7 +51,7 @@
     aggregation-count:integer   ;; N: Number of reports for aggregation
     is-active:bool)
 
-(defschema recent-reports
+(defschema recent-reports-schema
   reports:[string])
 
 ;; Tables
@@ -58,12 +59,13 @@
 (deftable reports:{report-schema})
 (deftable reporters:{reporter})
 (deftable symbols:{symbol-config})
-(deftable recent-reports-table:{recent-reports})
+(deftable recent-reports:{recent-reports-schema})
 
 ;; Key Functions
 
 (defun add-symbol:string (symbol:string avg-interval:decimal max-deviation:decimal aggregation-count:integer)
   @doc "Add a new symbol to the oracle"
+  (enforce-symbol-numbers avg-interval max-deviation aggregation-count)
 
   (with-capability (OPS)
     (insert symbols symbol
@@ -72,7 +74,7 @@
       , 'aggregation-count: aggregation-count
       , 'is-active: true })
 
-    (insert recent-reports-table symbol
+    (insert recent-reports symbol
       { 'reports: [] })))
 
 (defun submit-report:string (symbol:string reporter:string value:decimal)
@@ -108,11 +110,11 @@
   (with-read symbols symbol
     { 'aggregation-count := agg-count }
 
-    (with-read recent-reports-table symbol
+    (with-read recent-reports symbol
       { 'reports := current-reports }
 
         ;; Using util-lists fifo-push to maintain a fixed-size list
-        (write recent-reports-table symbol
+        (write recent-reports symbol
           { 'reports: (fifo-push current-reports agg-count report) }))))
 
 (defun update-symbol-status:string (symbol:string is-active:bool)
@@ -121,12 +123,32 @@
     (update symbols symbol
       { 'is-active: is-active })))
 
+(defun update-symbol:string (symbol:string avg-interval:decimal max-deviation:decimal aggregation-count:integer)
+  @doc "Update the symbol configuration"
+  (with-read symbols symbol
+    { 'aggregation-count := old-agg-count }
+  (enforce-symbol-numbers avg-interval max-deviation aggregation-count)
+
+  (with-capability (OPS)
+    (update symbols symbol
+      { 'avg-interval: avg-interval
+      , 'max-deviation: max-deviation
+      , 'aggregation-count: aggregation-count })
+
+       ;; If aggregation count decreased, trim the recent reports list
+      (if (= aggregation-count old-agg-count)
+        "No change in aggregation count"
+        (with-read recent-reports symbol
+          { 'reports := current-reports }
+          (update recent-reports symbol
+            { 'reports: (take (- aggregation-count) current-reports) }))))))
+
 ;; Reporter Management
 
-;; We could change this to write and have one function vs two, but is built with a purpose here
 (defun add-reporter:string (reporter:string symbol:string description:string g:guard)
    @doc "Add or Update a reporter"
-  (with-capability (OPS)
+   (enforce-reserved reporter g)
+   (with-capability (OPS)
     (insert reporters (reporter-key reporter symbol)
     { 'description: description
     , 'guard: g
@@ -143,7 +165,7 @@
 
 (defun get-recent-reports:[object{report-schema}] (symbol:string)
   @doc "Get recent reports for a symbol using the index"
-  (with-read recent-reports-table symbol
+  (with-read recent-reports symbol
     { 'reports := r-id }
         (map (read reports) r-id)))
 
@@ -221,9 +243,16 @@
   @doc "Enforce that there are recent reports for a symbol"
     (let ((recent-reports (get-recent-reports symbol)))
     (enforce (> (length recent-reports) 0) "No recent reports available")))
+
+(defun enforce-symbol-numbers:bool (avg-interval:decimal max-deviation:decimal aggregation-count:integer)
+  @doc "Enforce that a decimal is a number and an integer is a number"
+    (enforce (> avg-interval 0.0) "Average interval must be greater than 0.0")
+    (enforce (> max-deviation 0.0) "Max deviation must be greater than 0.0")
+    (enforce (> aggregation-count 0) "Aggregation count must be greater than 0"))
+
 )
 
 (create-table reports)
 (create-table reporters)
 (create-table symbols)
-(create-table recent-reports-table)
+(create-table recent-reports)

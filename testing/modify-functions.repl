@@ -1,0 +1,26 @@
+(begin-tx "Remove reporter")
+(namespace 'ORACLE_NS)
+(use oracle)
+(env-keys ["ops"])
+(env-data {'kda: "KDA/USD"})
+
+(update-reporter-status "dave" (read-msg 'kda) false)
+
+(commit-tx)
+
+(begin-tx "Modify Symbol")
+(env-keys [])
+(namespace 'ORACLE_NS)
+(use oracle)
+(env-data {'kda: "KDA/USD"})
+(expect-failure "No permission to modify symbol" "Keyset failure" (update-symbol (read-msg 'kda) 900.0 100.0 4))
+(env-sigs [{ 'key: "ops", 'caps: [(OPS)]}])
+(expect-failure "No permission to modify symbol" "Aggregation count must be greater than 0" (update-symbol (read-msg 'kda) 900.0 100.0 -4))
+(expect-failure "No permission to modify symbol" "Average interval must be greater than 0.0" (update-symbol (read-msg 'kda) -900.0 100.0 4))
+(expect-failure "No permission to modify symbol" "Max deviation must be greater than 0.0" (update-symbol (read-msg 'kda) 900.0 -100.0 4))
+
+(expect "Update successful" "Write succeeded" (update-symbol (read-msg 'kda) 900.0 100.0 4))
+
+(print (get-recent-reports (read-msg 'kda)))
+
+(rollback-tx)
