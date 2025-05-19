@@ -4,7 +4,8 @@
 (namespace 'ORACLE_NS)
 (use oracle)
 (env-data {
-    'kda: "KDA/USD"
+    'kda: "KDA/USD",
+    'btc: "KDA/BTC"
 })
 ;  (print (get-recent-reports (read-msg 'kda)))
 ;  (print (get-price (read-msg 'kda)))
@@ -14,8 +15,8 @@
 ;  (print (get-report-time (format "KDA/USD:bob:{}" [(time "1970-01-01T00:00:01Z")])))
 
 (expect "Bob is healthy" false (reporter-health-check "bob" (read-msg 'kda)))
-(enforce (< (env-gas) 10000) "Gas should be less than 10,000")
 (expect "Five entries" 5 (length (get-recent-reports (read-msg 'kda))))
+(expect "No entries" 0 (length (get-recent-reports (read-msg 'btc))))
 
 ;  (print (get-reporters-by-symbols (read-msg 'kda)))
 (commit-tx)

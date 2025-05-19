@@ -13,14 +13,34 @@
 (namespace 'ORACLE_NS)
 (use oracle)
 (env-data {'kda: "KDA/USD"})
-(expect-failure "No permission to modify symbol" "Keyset failure" (update-symbol (read-msg 'kda) 900.0 100.0 4))
-(env-sigs [{ 'key: "ops", 'caps: [(OPS)]}])
-(expect-failure "No permission to modify symbol" "Aggregation count must be greater than 0" (update-symbol (read-msg 'kda) 900.0 100.0 -4))
-(expect-failure "No permission to modify symbol" "Average interval must be greater than 0.0" (update-symbol (read-msg 'kda) -900.0 100.0 4))
-(expect-failure "No permission to modify symbol" "Max deviation must be greater than 0.0" (update-symbol (read-msg 'kda) 900.0 -100.0 4))
+(expect-failure "No permission to modify symbol" "Keyset failure" (update-symbol (read-msg 'kda) 900.0 100.0 4 true))
 
-(expect "Update successful" "Write succeeded" (update-symbol (read-msg 'kda) 900.0 100.0 4))
+(env-sigs [{ 'key: "ops", 'caps: [(OPS)]}])
+(expect-failure "No permission to modify symbol" "Aggregation count must be greater than 0" (update-symbol (read-msg 'kda) 900.0 100.0 -4 true))
+(expect-failure "No permission to modify symbol" "Average interval must be greater than 0.0" (update-symbol (read-msg 'kda) -900.0 100.0 4 true))
+(expect-failure "No permission to modify symbol" "Max deviation must be greater than 0.0" (update-symbol (read-msg 'kda) 900.0 -100.0 4 true))
+
+(expect "Update successful" "Write succeeded" (update-symbol (read-msg 'kda) 900.0 100.0 4 true))
 
 (expect "Four entries" 4 (length (get-recent-reports (read-msg 'kda))))
+
+(rollback-tx)
+
+(begin-tx "Modify BTC Symbol")
+(namespace 'ORACLE_NS)
+(use oracle)
+(env-data {
+    'kda: "KDA/USD",
+    'btc: "KDA/BTC",
+    'bob-key: {'keys: ["bob-key"]}
+})
+(env-sigs [{ 'key: "ops", 'caps: [(OPS)]}])
+(add-reporter "bob" (read-msg 'btc) "bobs" (read-keyset 'bob-key))
+
+(env-sigs [{ 'key: "bob-key", 'caps: [(REPORTER "bob" (read-msg 'btc))]}])
+(expect "Bob submits his price" "Write succeeded" (submit-report (read-msg 'btc) "bob" 0.001))
+(expect "One entry" 1 (length (get-recent-reports (read-msg 'btc))))
+(expect "Price is correct for 2nd pair" 0.001 (at 'value (get-price (read-msg 'btc))))
+(expect "Five entries" 5 (length (get-recent-reports (read-msg 'kda))))
 
 (rollback-tx)

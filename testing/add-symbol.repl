@@ -3,9 +3,14 @@
 (use oracle)
 (env-keys ["ops"])
 (env-data {
-    'kda: "KDA/USD"
+    'kda: "KDA/USD",
+    'btc: "KDA/BTC"
 })
-(add-symbol (read-msg 'kda) 3600.0 900.0 5)
+(expect "added kda pair" "Write succeeded" (update-symbol (read-msg 'kda) 3600.0 900.0 5 true))
+
 (expect "no reports yet" [] (get-recent-reports (read-msg 'kda)))
+(expect "No reporters yet" []  (get-reporters-by-symbols (read-msg 'kda)))
+
+(expect "added btc pair" "Write succeeded" (update-symbol (read-msg 'btc) 3600.0 900.0 5 true))
 
 (commit-tx)

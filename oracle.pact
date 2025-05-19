@@ -32,8 +32,6 @@
     value:decimal)
 
 (defschema report-schema
-    reporter:string
-    symbol:string
     timestamp:time
     value:decimal)
 
@@ -62,21 +60,7 @@
 (deftable symbols:{symbol-config})
 (deftable recent-reports:{recent-reports-schema})
 
-;; Key Functions
-
-(defun add-symbol:string (symbol:string avg-interval:decimal max-deviation:decimal aggregation-count:integer)
-  @doc "Add a new symbol to the oracle"
-  (enforce-symbol-numbers avg-interval max-deviation aggregation-count)
-
-  (with-capability (OPS)
-    (insert symbols symbol
-      { 'avg-interval: avg-interval
-      , 'max-deviation: max-deviation
-      , 'aggregation-count: aggregation-count
-      , 'is-active: true })
-
-    (insert recent-reports symbol
-      { 'reports: [] })))
+;; Main Functions
 
 (defun submit-report:string (symbol:string reporter:string value:decimal)
   @doc "Submit a price report for a symbol"
@@ -96,9 +80,8 @@
 
             ;; Store the report
             (insert reports r-id
-            { 'symbol: symbol
-            , 'reporter: reporter
-            , 'timestamp: (now)
+            {
+              'timestamp: (now)
             , 'value: value })
 
         ;; Update recent reports list
@@ -124,26 +107,22 @@
     (update symbols symbol
       { 'is-active: is-active })))
 
-(defun update-symbol:string (symbol:string avg-interval:decimal max-deviation:decimal aggregation-count:integer)
-  @doc "Update the symbol configuration"
+(defun update-symbol:string (symbol:string avg-interval:decimal max-deviation:decimal aggregation-count:integer is-active:bool)
+  @doc "Add or Update the symbol configuration"
   (enforce-symbol-numbers avg-interval max-deviation aggregation-count)
 
-  (with-read symbols symbol
-    { 'aggregation-count := old-agg-count }
-
   (with-capability (OPS)
-    (update symbols symbol
+    (write symbols symbol
       { 'avg-interval: avg-interval
       , 'max-deviation: max-deviation
-      , 'aggregation-count: aggregation-count })
+      , 'aggregation-count: aggregation-count
+      , 'is-active: is-active })
 
        ;; If aggregation count decreased, trim the recent reports list
-      (if (= aggregation-count old-agg-count)
-        "No change in aggregation count"
-        (with-read recent-reports symbol
-          { 'reports := current-reports }
-          (update recent-reports symbol
-            { 'reports: (take (- aggregation-count) current-reports) }))))))
+        (with-default-read recent-reports symbol
+         { 'reports : [] } { 'reports := current-reports }
+          (write recent-reports symbol
+            { 'reports: (take (- aggregation-count) current-reports) }))))
 
 ;; Reporter Management
 
