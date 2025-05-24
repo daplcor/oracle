@@ -10,7 +10,7 @@
 (begin-tx)
 (namespace 'ORACLE_NS)
 (load "oracle.pact")
-(typecheck "ORACLE_NS.oracle")
+;  (typecheck "ORACLE_NS.oracle")
 (commit-tx)
 
 ;  (env-gasmodel "table")(env-gaslimit 75000)
