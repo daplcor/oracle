@@ -9,7 +9,7 @@
 (expect "added kda pair" "Write succeeded" (update-symbol (read-msg 'kda) 3600.0 900.0 5 true))
 
 (expect "no reports yet" [] (get-recent-reports (read-msg 'kda)))
-(expect "No reporters yet" []  (get-reporters-by-symbols (read-msg 'kda)))
+(expect "No reporters yet" []  (get-reporters-by-symbol (read-msg 'kda)))
 
 (expect "added btc pair" "Write succeeded" (update-symbol (read-msg 'btc) 3600.0 900.0 5 true))
 

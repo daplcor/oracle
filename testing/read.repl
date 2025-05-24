@@ -18,5 +18,5 @@
 (expect "Five entries" 4 (length (get-recent-reports (read-msg 'kda))))
 (expect "No entries" 0 (length (get-recent-reports (read-msg 'btc))))
 
-;  (print (get-reporters-by-symbols (read-msg 'kda)))
+;  (print (get-reporters-by-symbol (read-msg 'kda)))
 (commit-tx)

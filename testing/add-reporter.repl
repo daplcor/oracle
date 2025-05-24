@@ -9,6 +9,8 @@
     'kda: "KDA/USD"
 })
 (add-reporter "bob" (read-msg 'kda) "bobs" (read-keyset 'bob-key))
+(print (get-reporters-by-symbol (read-msg 'kda)))
+
 (add-reporter "alice" (read-msg 'kda) "alices" (read-keyset 'alice-key))
 (add-reporter "dave" (read-msg 'kda) "daves" (read-keyset 'dave-key))
 
