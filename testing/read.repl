@@ -15,7 +15,7 @@
 ;  (print (get-report-time (format "KDA/USD:bob:{}" [(time "1970-01-01T00:00:01Z")])))
 
 (expect "Bob is healthy" false (reporter-health-check "bob" (read-msg 'kda)))
-(expect "Five entries" 5 (length (get-recent-reports (read-msg 'kda))))
+(expect "Five entries" 4 (length (get-recent-reports (read-msg 'kda))))
 (expect "No entries" 0 (length (get-recent-reports (read-msg 'btc))))
 
 ;  (print (get-reporters-by-symbols (read-msg 'kda)))

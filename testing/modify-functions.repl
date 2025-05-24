@@ -4,9 +4,29 @@
 (env-keys ["ops"])
 (env-data {'kda: "KDA/USD"})
 
+; Check the recent reports length before
+(expect "Four entries" 5 (length (get-recent-reports (read-msg 'kda))))
+
+; Here dave has a report in recent reports
 (update-reporter-status "dave" (read-msg 'kda) false)
 
+; So recent reports length should be cleaned
+(expect "Four entries" 4 (length (get-recent-reports (read-msg 'kda))))
 (commit-tx)
+
+; Try to re-enable Dave and rollback
+(begin-tx "Remove reporter")
+(namespace 'ORACLE_NS)
+(use oracle)
+(env-keys ["ops"])
+(env-data {'kda: "KDA/USD"})
+
+(update-reporter-status "dave" (read-msg 'kda) true)
+
+; Nothing is supposed to happen here, since dave report was already removed
+(expect "Four entries" 4 (length (get-recent-reports (read-msg 'kda))))
+(rollback-tx)
+
 
 (begin-tx "Modify Symbol")
 (env-keys [])
@@ -41,6 +61,6 @@
 (expect "Bob submits his price" "Write succeeded" (submit-report (read-msg 'btc) "bob" 0.001))
 (expect "One entry" 1 (length (get-recent-reports (read-msg 'btc))))
 (expect "Price is correct for 2nd pair" 0.001 (at 'value (get-price (read-msg 'btc))))
-(expect "Five entries" 5 (length (get-recent-reports (read-msg 'kda))))
+(expect "Five entries" 4 (length (get-recent-reports (read-msg 'kda))))
 
 (rollback-tx)
