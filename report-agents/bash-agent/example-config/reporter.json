@@ -1,0 +1,12 @@
+{
+  "chain": 2,
+  "gas-payer": "k:c8973a3d5b9d0e4854c711785a9b083055ec1e965696efc844ae36e3e5142cad",
+  "gas-key": "c8973a3d5b9d0e4854c711785a9b083055ec1e965696efc844ae36e3e5142cad",
+  "reporter": "Reporter-Reg-Name",
+  "symbol": "KDA/USD",
+  "reporter-key": "6ec61165c4cb2b68ed4e8a657953d8c9f54658629be7cc99609eeef4be6ea421",
+  "oracle": "n_f9b22d2046c2a52575cc94f961c8b9a095e349e7.oracle",
+  "network": "development",
+  "source": "coinmarketcap",
+  "source-api-key": "48f25046-5fd9-4ef4-9f87-a5a78fdff2d8"
+}
