@@ -142,7 +142,14 @@
     @doc "Update the active status of a reporter"
     (with-capability (OPS)
         (update reporters (reporter-key reporter symbol)
-        { 'is-active: is-active })))
+        { 'is-active: is-active })
+
+        ; In case a reporter is disabled remove its recent reports immediately
+        (with-read reporters (reporter-key reporter symbol) {'last-report-id := last-report-id}
+          (with-read recent-reports symbol {'reports := current-reports}
+            (update recent-reports symbol
+              {'reports: (remove-item current-reports (if (not is-active) last-report-id ""))})))))
+
 
 (defun get-recent-reports:[object{report-schema}] (symbol:string)
   @doc "Get recent reports for a symbol using the index"
