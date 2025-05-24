@@ -62,6 +62,10 @@
 
 ;; Main Functions
 
+(defun init:string ()
+  @doc "Initialize the oracle system"
+    (insert reports "" { 'timestamp: EPOCH, 'value: 0.0 }))
+
 (defun submit-report:string (symbol:string reporter:string value:decimal)
   @doc "Submit a price report for a symbol"
 
@@ -189,10 +193,10 @@
     , 'max-deviation := max-deviation }
     (add-time (now) (+ avg-interval (random-decimal-range (- max-deviation) max-deviation)))))
 
-(defun get-reporters-by-symbols:[object{reporter-schema}] (symbol:string)
+(defun get-reporters-by-symbol (symbol:string)
     @doc "Get all reporters for a given symbol, local call only due to gas"
    (fold-db reporters (lambda (k obj) (and (ends-with k symbol) (at 'is-active obj) ))
-                      (lambda (k obj) (+ obj {'last-report-id: (read reports (at 'last-report-id obj))}))))
+                      (lambda (k obj) (+ obj {'reporter: k, 'last-report: (read reports (at 'last-report-id obj))}))))
 
 
 (defun reporter-key:string (reporter:string symbol:string)
@@ -237,3 +241,4 @@
 (create-table reporters)
 (create-table symbols)
 (create-table recent-reports)
+(init)
