@@ -1,15 +1,9 @@
 #!/bin/bash
-VERSION="1.0"
+VERSION="2.0"
 CONFIG_FILE=${1:-"reporter.json"}
 KDA=`which kda`
 
 echo "Oracle Reporter v$VERSION"
-
-if [ -z $CONFIG_FILE ]
-then
-  echo "Missing config"
-  exit 1
-fi
 
 # Check that all files are present
 for _file in $CONFIG_FILE "gas.key" "reporter.key"
@@ -34,7 +28,6 @@ function get_value () {
   KEY=`jq -r '."source-api-key"' < $CONFIG_FILE`
 
   case $SOURCE in
-
     TRADEOGRE|tradeogre|Tradeogre)
       echo "Retrieving TradeOgre ticker"
       VALUE=`curl -s https://tradeogre.com/api/v1/markets | jq -r '.[] | select(."KDA-USDT") | .[].price'`;;
@@ -47,6 +40,12 @@ function get_value () {
     KUCOIN|Kucoin|kucoin)
       echo "Retrieving Kucoin ticker"
       VALUE=`curl -s https://api.kucoin.com/api/v1/market/orderbook/level1?symbol=KDA-USDT| jq -r ".data.price"`;;
+    BYBIT|ByBit|bybit)
+      echo "Retrieving Bybit ticker"
+      VALUE=`curl -s "https://api.bybit.com/v5/market/tickers?category=spot&symbol=KDAUSDT" |jq -r ".result.list | .[].lastPrice"`;;
+    OKX|OKEX|Okx|Okex|okx|okx)
+      echo "Retrieving OKX ticker"
+      VALUE=`curl -s "https://www.okx.com/api/v5/market/ticker?instId=KDA-USD"|jq -r ".data | .[0].last"`;;
     COINGECKO|coingecko|CoinGecko)
       echo "Retrieving CoinGecko price"
       VALUE=`curl -s -H "x-cg-demo-api-key: $KEY" "https://api.coingecko.com/api/v3/simple/price?ids=kadena&vs_currencies=usd" |jq -r ".kadena.usd"`;;

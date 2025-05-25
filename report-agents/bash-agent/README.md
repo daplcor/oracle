@@ -11,6 +11,8 @@ A reporter agent for the Oracle, written in pure Bash.
   - Binance
   - CoinEx
   - Kucoin
+  - OKX
+  - Bybit
 
 - Aggregators:
   - Coinmarketcap
@@ -52,6 +54,8 @@ Three files are required in the working directory:
     - `binance`
     - `coinex`
     - `kucoin`
+    - `okx`
+    - `bybit`
     - `coinmarketcap`
     - `coingecko`
   - **source-api-key**: API key, required **only** for `coinmarketcap` or `coingecko`
