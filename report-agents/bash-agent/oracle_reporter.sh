@@ -1,5 +1,5 @@
 #!/bin/bash
-VERSION="2.0"
+VERSION="2.1"
 CONFIG_FILE=${1:-"reporter.json"}
 KDA=`which kda`
 
@@ -81,12 +81,12 @@ type: exec
 EOF
 
 $KDA gen -t $TKPL -o $YAML -d $CONFIG_FILE > /dev/null
-_chain_time=`$KDA local  $YAML --no-verify-sigs |jq -r ".[][0].body.result.data | if .timep then .timep else .time end"`
+_chain_time=`$KDA local  $YAML --no-verify-sigs | tee tmp_log.txt |jq -r ".[][0].body.result.data | if .timep then .timep else .time end"`
 
-if [ $_chain_time = "null" ]
+if [[ -z $_chain_time || $_chain_time = "null" ]]
 then
-  echo "Unable to retieve the chain time"
-  $KDA local  $YAML --no-verify-sigs |jq
+  echo "ERROR = Unable to retrieve the chain time"
+  cat tmp_log.txt
   rm $TKPL $YAML
   return 1
 fi
@@ -112,12 +112,12 @@ type: exec
 EOF
 
 $KDA gen -t $TKPL -o $YAML -d $CONFIG_FILE > /dev/null
-_reporter_time=`$KDA local  $YAML --no-verify-sigs |jq -r ".[][0].body.result.data | if .timep then .timep else .time end"`
+_reporter_time=`$KDA local  $YAML --no-verify-sigs | tee tmp_log.txt | jq -r ".[][0].body.result.data | if .timep then .timep else .time end"`
 
-if [ $_reporter_time = "null" ]
+if [[ -z $_reporter_time || $_reporter_time = "null" ]]
 then
-  echo "Unable to retieve the reporter time"
-  $KDA local  $YAML --no-verify-sigs |jq
+  echo "ERROR = Unable to retrieve the reporter time"
+  cat tmp_log.txt
   rm $TKPL $YAML
   return 1
 fi
@@ -171,7 +171,7 @@ fi
 
 LOCAL_STATUS=`$KDA local $JSON | jq -r ".[][0].body.result.status"`
 
-if [ $LOCAL_STATUS = "success" ]
+if [[ $LOCAL_STATUS = "success" ]]
 then
   echo "Sending transaction"
   $KDA send $JSON
@@ -186,7 +186,7 @@ fi
 rm $TKPL $YAML $JSON
 }
 
-
+echo "Testing source ..."
 get_value
 
 while true
@@ -195,11 +195,22 @@ do
 
   if [ $? -ne 0 ]
   then
+    echo "ERROR = Error when retrieving data => Retry in 30s"
     sleep 30
     continue
   fi
 
+  LOCAL_TIME=`date +%s`
+  delta_local=$(($LOCAL_TIME - $CHAIN_TIME))
   delta=$(($REPORTER_TIME - $CHAIN_TIME))
+
+  if [ $delta_local -gt 120 ]
+  then
+    echo "ERROR = Node too far in the past => Retry in 60s"
+    sleep 60
+    continue
+  fi
+
   echo "Next report expected in" $delta "seconds"
   if [ $delta -ge 0 ]
   then
