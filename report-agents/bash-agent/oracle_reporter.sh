@@ -1,5 +1,5 @@
 #!/bin/bash
-VERSION="2.1"
+VERSION="2.2"
 CONFIG_FILE=${1:-"reporter.json"}
 KDA=`which kda`
 
@@ -29,8 +29,10 @@ function get_value () {
 
   case $SOURCE in
     TRADEOGRE|tradeogre|Tradeogre)
-      echo "Retrieving TradeOgre ticker"
-      VALUE=`curl -s https://tradeogre.com/api/v1/markets | jq -r '.[] | select(."KDA-USDT") | .[].price'`;;
+      echo "TradeOgre is not supported anymore => Falling back to MexC";&
+    MEXC | mexc | Mexc)
+      echo "Retrieving MEXC ticker"
+      VALUE=`curl -s https://api.mexc.com//api/v3/avgPrice?symbol=KDAUSDT |jq -r ".price"`;;
     BINANCE|binance|Binance)
       echo "Retrieving Binance ticker"
       VALUE=`curl -s https://data-api.binance.vision/api/v3/avgPrice?symbol=KDAUSDT |jq -r ".price"`;;

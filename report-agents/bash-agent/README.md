@@ -50,7 +50,7 @@ Three files are required in the working directory:
   - **reporter**: Name of the registered reporter within the oracle
   - **reporter-key**: Public key of the reporter (must match `reporter.key`)
   - **source**: One of the following data sources:
-    - `tradeogre`
+    - `mexc`
     - `binance`
     - `coinex`
     - `kucoin`
